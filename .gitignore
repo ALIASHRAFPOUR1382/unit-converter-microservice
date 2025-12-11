@@ -53,3 +53,7 @@ logs/
 .DS_Store
 Thumbs.db
 
+# Auto-commit scripts (optional - uncomment if you don't want to track these)
+# auto-commit.ps1
+# auto-commit.sh
+# GIT_AUTO_COMMIT.md
