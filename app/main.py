@@ -4,55 +4,55 @@ from app.database import init_db
 from app.routers import todos
 import logging
 
-# تنظیم logging
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
-# ایجاد FastAPI app
+# Create FastAPI app
 app = FastAPI(
     title="To-Do App Backend API",
-    description="یک API کامل برای مدیریت لیست وظایف (To-Do List) با قابلیت CRUD",
+    description="A complete API for managing To-Do List with CRUD capabilities",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
 )
 
-# تنظیم CORS
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # در production باید محدود شود
+    allow_origins=["*"],  # Should be restricted in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# اتصال routers
+# Include routers
 app.include_router(todos.router, prefix="/api")
 
 
 @app.on_event("startup")
 async def startup_event():
     """
-    رویداد startup - ایجاد جداول دیتابیس
+    Startup event - Create database tables
     """
-    logger.info("در حال راه‌اندازی اپلیکیشن...")
+    logger.info("Starting application...")
     try:
         init_db()
-        logger.info("جداول دیتابیس با موفقیت ایجاد شدند")
+        logger.info("Database tables created successfully")
     except Exception as e:
-        logger.error(f"خطا در ایجاد جداول دیتابیس: {e}")
+        logger.error(f"Error creating database tables: {e}")
 
 
 @app.get("/", tags=["health"])
 def root():
     """
-    صفحه اصلی - اطلاعات API
+    Root endpoint - API information
     """
     return {
-        "message": "خوش آمدید به To-Do App Backend API",
+        "message": "Welcome to To-Do App Backend API",
         "version": "1.0.0",
         "docs": "/docs",
         "health": "/health"
@@ -62,7 +62,7 @@ def root():
 @app.get("/health", tags=["health"])
 def health_check():
     """
-    Health check endpoint برای بررسی وضعیت سرویس
+    Health check endpoint to verify service status
     """
     return {
         "status": "healthy",

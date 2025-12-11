@@ -1,12 +1,12 @@
 #!/bin/bash
-# اسکریپت commit خودکار برای به‌روزرسانی تدریجی پروژه (Linux/Mac)
-# این اسکریپت تغییرات را به صورت خودکار commit می‌کند
+# Auto-commit script for gradual project updates (Linux/Mac)
+# This script automatically commits changes
 
 MESSAGE=""
 PUSH=false
 INTERVAL=0
 
-# پارس کردن آرگومان‌ها
+# Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         -m|--message)
@@ -22,18 +22,18 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         *)
-            echo "استفاده: $0 [-m MESSAGE] [-p] [-i INTERVAL]"
+            echo "Usage: $0 [-m MESSAGE] [-p] [-i INTERVAL]"
             exit 1
             ;;
     esac
 done
 
-# تابع برای بررسی تغییرات
+# Function to check for changes
 check_changes() {
     git status --porcelain | grep -q .
 }
 
-# تابع برای ایجاد پیام commit
+# Function to generate commit message
 get_commit_message() {
     if [ -n "$MESSAGE" ]; then
         echo "$MESSAGE"
@@ -42,51 +42,51 @@ get_commit_message() {
     
     FILES=$(git status --short | awk '{print $2}' | tr '\n' ',' | sed 's/,$//')
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-    echo "Auto-commit: تغییرات در $FILES - $TIMESTAMP"
+    echo "Auto-commit: Changes in $FILES - $TIMESTAMP"
 }
 
-# تابع برای commit تغییرات
+# Function to commit changes
 commit_changes() {
-    echo "در حال بررسی تغییرات..."
+    echo "Checking for changes..."
     
     if ! check_changes; then
-        echo "هیچ تغییراتی برای commit وجود ندارد."
+        echo "No changes to commit."
         return 1
     fi
     
-    echo "تغییرات پیدا شد. در حال commit..."
+    echo "Changes found. Committing..."
     
-    # اضافه کردن تمام تغییرات
+    # Add all changes
     git add -A
     
-    # ایجاد commit
+    # Create commit
     COMMIT_MSG=$(get_commit_message)
     git commit -m "$COMMIT_MSG"
     
     if [ $? -eq 0 ]; then
-        echo "✓ Commit با موفقیت انجام شد: $COMMIT_MSG"
+        echo "Commit successful: $COMMIT_MSG"
         
         if [ "$PUSH" = true ]; then
-            echo "در حال push به remote..."
+            echo "Pushing to remote..."
             git push
             if [ $? -eq 0 ]; then
-                echo "✓ Push با موفقیت انجام شد."
+                echo "Push successful."
             else
-                echo "✗ خطا در push."
+                echo "Push failed."
             fi
         fi
         
         return 0
     else
-        echo "✗ خطا در commit."
+        echo "Commit failed."
         return 1
     fi
 }
 
-# اجرای اصلی
+# Main execution
 if [ "$INTERVAL" -gt 0 ]; then
-    echo "حالت نظارت فعال شد. هر $INTERVAL ثانیه یکبار بررسی می‌شود..."
-    echo "برای توقف، Ctrl+C را فشار دهید."
+    echo "Monitoring mode activated. Checking every $INTERVAL seconds..."
+    echo "Press Ctrl+C to stop."
     echo ""
     
     while true; do
@@ -96,4 +96,3 @@ if [ "$INTERVAL" -gt 0 ]; then
 else
     commit_changes
 fi
-

@@ -232,47 +232,47 @@ docker-compose up --build
 
 ## 🔄 Git Workflow
 
-این پروژه از Git workflow با feature branches استفاده می‌کند:
+This project uses Git workflow with feature branches:
 
 ### Feature Branches
 
-- `feature/database-setup`: پیاده‌سازی لایه دیتابیس
-- `feature/api-endpoints`: پیاده‌سازی API endpoints
-- `feature/docker-setup`: تنظیمات Docker
+- `feature/database-setup`: Database layer implementation
+- `feature/api-endpoints`: API endpoints implementation
+- `feature/docker-setup`: Docker configuration
 
 ### Pull Requests
 
-برای ادغام کدها به شاخه اصلی (`main` یا `master`)، از Pull Requests استفاده می‌شود.
+Pull Requests are used to merge code into the main branch (`main` or `master`).
 
-### کامیت‌ها
+### Commits
 
-کامیت‌ها باید شفاف و گویا باشند و پیشرفت تدریجی پروژه را نشان دهند.
+Commits should be clear and descriptive, showing the gradual progress of the project.
 
-### سیستم Commit تدریجی
+### Incremental Commit System
 
-این پروژه شامل یک سیستم commit خودکار برای به‌روزرسانی تدریجی است:
+This project includes an automatic commit system for incremental updates:
 
-#### استفاده سریع
+#### Quick Usage
 
 **Windows (PowerShell):**
 ```powershell
-# Commit خودکار با پیام پیش‌فرض
+# Auto commit with default message
 .\auto-commit.ps1
 
-# Commit با پیام سفارشی و push
-.\auto-commit.ps1 -Message "اضافه کردن ویژگی جدید" -Push
+# Commit with custom message and push
+.\auto-commit.ps1 -Message "Add new feature" -Push
 
-# نظارت مداوم (هر 60 ثانیه)
+# Continuous monitoring (every 60 seconds)
 .\auto-commit.ps1 -Interval 60
 ```
 
 **Linux/Mac (Bash):**
 ```bash
 chmod +x auto-commit.sh
-./auto-commit.sh -m "اضافه کردن ویژگی جدید" -p
+./auto-commit.sh -m "Add new feature" -p
 ```
 
-برای اطلاعات بیشتر، فایل [`GIT_AUTO_COMMIT.md`](GIT_AUTO_COMMIT.md) را مطالعه کنید.
+For more information, see the [`GIT_AUTO_COMMIT.md`](GIT_AUTO_COMMIT.md) file.
 
 ## 📚 مستندات API
 

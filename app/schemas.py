@@ -5,23 +5,23 @@ from datetime import datetime
 
 class TodoBase(BaseModel):
     """
-    Schema پایه برای Todo
+    Base schema for Todo
     """
-    title: str = Field(..., min_length=1, max_length=200, description="عنوان وظیفه")
-    description: Optional[str] = Field(None, max_length=1000, description="توضیحات وظیفه")
-    completed: Optional[bool] = Field(False, description="وضعیت انجام وظیفه")
+    title: str = Field(..., min_length=1, max_length=200, description="Task title")
+    description: Optional[str] = Field(None, max_length=1000, description="Task description")
+    completed: Optional[bool] = Field(False, description="Task completion status")
 
 
 class TodoCreate(TodoBase):
     """
-    Schema برای ایجاد Todo جدید
+    Schema for creating a new Todo
     """
     pass
 
 
 class TodoUpdate(BaseModel):
     """
-    Schema برای به‌روزرسانی Todo (همه فیلدها اختیاری)
+    Schema for updating Todo (all fields optional)
     """
     title: Optional[str] = Field(None, min_length=1, max_length=200)
     description: Optional[str] = Field(None, max_length=1000)
@@ -30,19 +30,19 @@ class TodoUpdate(BaseModel):
 
 class TodoResponse(TodoBase):
     """
-    Schema برای پاسخ API (شامل id و timestamps)
+    Schema for API response (includes id and timestamps)
     """
     id: int
     created_at: datetime
     updated_at: datetime
 
     class Config:
-        from_attributes = True  # برای SQLAlchemy models (قبلاً orm_mode)
+        from_attributes = True  # For SQLAlchemy models (formerly orm_mode)
 
 
 class TodoListResponse(BaseModel):
     """
-    Schema برای پاسخ لیست Todos با pagination
+    Schema for Todo list response with pagination
     """
     items: list[TodoResponse]
     total: int

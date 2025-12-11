@@ -14,28 +14,28 @@ def create_todo(
     db: Session = Depends(get_db)
 ):
     """
-    ایجاد یک Todo جدید
+    Create a new Todo
     
-    - **title**: عنوان وظیفه (اجباری)
-    - **description**: توضیحات وظیفه (اختیاری)
-    - **completed**: وضعیت انجام (پیش‌فرض: false)
+    - **title**: Task title (required)
+    - **description**: Task description (optional)
+    - **completed**: Completion status (default: false)
     """
     return crud.create_todo(db=db, todo=todo)
 
 
 @router.get("", response_model=schemas.TodoListResponse)
 def get_todos(
-    page: int = Query(1, ge=1, description="شماره صفحه"),
-    page_size: int = Query(10, ge=1, le=100, description="تعداد آیتم در هر صفحه"),
-    completed: Optional[bool] = Query(None, description="فیلتر بر اساس وضعیت انجام"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(10, ge=1, le=100, description="Number of items per page"),
+    completed: Optional[bool] = Query(None, description="Filter by completion status"),
     db: Session = Depends(get_db)
 ):
     """
-    دریافت لیست Todos با pagination و filtering
+    Get list of Todos with pagination and filtering
     
-    - **page**: شماره صفحه (شروع از 1)
-    - **page_size**: تعداد آیتم در هر صفحه (حداکثر 100)
-    - **completed**: فیلتر بر اساس وضعیت (true/false/null برای همه)
+    - **page**: Page number (starts from 1)
+    - **page_size**: Number of items per page (max 100)
+    - **completed**: Filter by status (true/false/null for all)
     """
     skip = (page - 1) * page_size
     todos, total = crud.get_todos(db=db, skip=skip, limit=page_size, completed=completed)
@@ -57,11 +57,11 @@ def get_todo(
     db: Session = Depends(get_db)
 ):
     """
-    دریافت یک Todo بر اساس ID
+    Get a Todo by ID
     """
     db_todo = crud.get_todo(db=db, todo_id=todo_id)
     if db_todo is None:
-        raise HTTPException(status_code=404, detail="Todo پیدا نشد")
+        raise HTTPException(status_code=404, detail="Todo not found")
     return db_todo
 
 
@@ -72,11 +72,11 @@ def update_todo_full(
     db: Session = Depends(get_db)
 ):
     """
-    به‌روزرسانی کامل یک Todo (PUT)
+    Full update of a Todo (PUT)
     """
     db_todo = crud.update_todo(db=db, todo_id=todo_id, todo_update=todo)
     if db_todo is None:
-        raise HTTPException(status_code=404, detail="Todo پیدا نشد")
+        raise HTTPException(status_code=404, detail="Todo not found")
     return db_todo
 
 
@@ -87,12 +87,12 @@ def update_todo_partial(
     db: Session = Depends(get_db)
 ):
     """
-    به‌روزرسانی جزئی یک Todo (PATCH)
-    می‌توانید فقط فیلدهای مورد نظر را ارسال کنید
+    Partial update of a Todo (PATCH)
+    You can send only the fields you want to update
     """
     db_todo = crud.update_todo(db=db, todo_id=todo_id, todo_update=todo)
     if db_todo is None:
-        raise HTTPException(status_code=404, detail="Todo پیدا نشد")
+        raise HTTPException(status_code=404, detail="Todo not found")
     return db_todo
 
 
@@ -102,10 +102,10 @@ def delete_todo(
     db: Session = Depends(get_db)
 ):
     """
-    حذف یک Todo
+    Delete a Todo
     """
     success = crud.delete_todo(db=db, todo_id=todo_id)
     if not success:
-        raise HTTPException(status_code=404, detail="Todo پیدا نشد")
+        raise HTTPException(status_code=404, detail="Todo not found")
     return None
 

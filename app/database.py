@@ -6,25 +6,25 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# دریافت اطلاعات اتصال از متغیرهای محیطی
+# Get connection information from environment variables
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql://postgres:postgres@localhost:5432/tododb"
 )
 
-# ایجاد engine
+# Create engine
 engine = create_engine(DATABASE_URL, echo=True)
 
-# ایجاد SessionLocal
+# Create SessionLocal
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base class برای models
+# Base class for models
 Base = declarative_base()
 
 
 def get_db():
     """
-    Dependency برای دریافت database session
+    Dependency to get database session
     """
     db = SessionLocal()
     try:
@@ -35,7 +35,7 @@ def get_db():
 
 def init_db():
     """
-    ایجاد جداول دیتابیس
+    Create database tables
     """
     Base.metadata.create_all(bind=engine)
 

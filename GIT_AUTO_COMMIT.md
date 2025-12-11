@@ -1,173 +1,173 @@
-# راهنمای استفاده از سیستم Commit تدریجی
+# Incremental Commit System Guide
 
-این سیستم به شما کمک می‌کند تا تغییرات پروژه را به صورت تدریجی و خودکار در Git commit کنید.
+This system helps you automatically commit project changes incrementally to Git.
 
-## 📋 فایل‌های ایجاد شده
+## 📋 Created Files
 
-1. **`auto-commit.ps1`**: اسکریپت PowerShell برای Windows
-2. **`auto-commit.sh`**: اسکریپت Bash برای Linux/Mac
-3. **`.git/hooks/post-commit`**: Git hook که بعد از هر commit اطلاعات را نمایش می‌دهد
+1. **`auto-commit.ps1`**: PowerShell script for Windows
+2. **`auto-commit.sh`**: Bash script for Linux/Mac
+3. **`.git/hooks/post-commit`**: Git hook that displays information after each commit
 
-## 🚀 نحوه استفاده
+## 🚀 Usage
 
-### روش 1: Commit دستی (یکباره)
+### Method 1: Manual Commit (One-time)
 
-#### در Windows (PowerShell):
+#### Windows (PowerShell):
 ```powershell
-# Commit با پیام پیش‌فرض
+# Commit with default message
 .\auto-commit.ps1
 
-# Commit با پیام سفارشی
-.\auto-commit.ps1 -Message "اضافه کردن ویژگی جدید"
+# Commit with custom message
+.\auto-commit.ps1 -Message "Add new feature"
 
-# Commit و push همزمان
+# Commit and push simultaneously
 .\auto-commit.ps1 -Push
 
-# Commit با پیام و push
-.\auto-commit.ps1 -Message "به‌روزرسانی" -Push
+# Commit with message and push
+.\auto-commit.ps1 -Message "Update" -Push
 ```
 
-#### در Linux/Mac (Bash):
+#### Linux/Mac (Bash):
 ```bash
-# دادن دسترسی اجرا
+# Grant execute permission
 chmod +x auto-commit.sh
 
-# Commit با پیام پیش‌فرض
+# Commit with default message
 ./auto-commit.sh
 
-# Commit با پیام سفارشی
-./auto-commit.sh -m "اضافه کردن ویژگی جدید"
+# Commit with custom message
+./auto-commit.sh -m "Add new feature"
 
-# Commit و push همزمان
+# Commit and push simultaneously
 ./auto-commit.sh -p
 
-# Commit با پیام و push
-./auto-commit.sh -m "به‌روزرسانی" -p
+# Commit with message and push
+./auto-commit.sh -m "Update" -p
 ```
 
-### روش 2: Commit خودکار (نظارت مداوم)
+### Method 2: Auto Commit (Continuous Monitoring)
 
-این روش به صورت خودکار هر چند ثانیه یکبار تغییرات را بررسی و commit می‌کند.
+This method automatically checks and commits changes every few seconds.
 
-#### در Windows:
+#### Windows:
 ```powershell
-# بررسی هر 30 ثانیه یکبار
+# Check every 30 seconds
 .\auto-commit.ps1 -Interval 30
 
-# بررسی هر 60 ثانیه با push خودکار
+# Check every 60 seconds with auto push
 .\auto-commit.ps1 -Interval 60 -Push
 ```
 
-#### در Linux/Mac:
+#### Linux/Mac:
 ```bash
-# بررسی هر 30 ثانیه یکبار
+# Check every 30 seconds
 ./auto-commit.sh -i 30
 
-# بررسی هر 60 ثانیه با push خودکار
+# Check every 60 seconds with auto push
 ./auto-commit.sh -i 60 -p
 ```
 
-برای توقف نظارت، `Ctrl+C` را فشار دهید.
+Press `Ctrl+C` to stop monitoring.
 
-## 📝 مثال‌های کاربردی
+## 📝 Usage Examples
 
-### مثال 1: Commit بعد از هر تغییر کوچک
+### Example 1: Commit after small changes
 ```powershell
-# بعد از هر تغییر کوچک در کد، این دستور را اجرا کنید
-.\auto-commit.ps1 -Message "بهبود کد"
+# After each small code change, run this command
+.\auto-commit.ps1 -Message "Code improvement"
 ```
 
-### مثال 2: نظارت مداوم در حین توسعه
+### Example 2: Continuous monitoring during development
 ```powershell
-# در یک ترمینال جداگانه اجرا کنید
-.\auto-commit.ps1 -Interval 120  # هر 2 دقیقه بررسی می‌کند
+# Run in a separate terminal
+.\auto-commit.ps1 -Interval 120  # Checks every 2 minutes
 ```
 
-### مثال 3: Commit و push همزمان
+### Example 3: Commit and push simultaneously
 ```powershell
-.\auto-commit.ps1 -Message "تکمیل ویژگی X" -Push
+.\auto-commit.ps1 -Message "Complete feature X" -Push
 ```
 
-## ⚙️ تنظیمات پیشرفته
+## ⚙️ Advanced Configuration
 
-### استفاده در Task Scheduler (Windows)
+### Using Task Scheduler (Windows)
 
-می‌توانید اسکریپت را در Windows Task Scheduler تنظیم کنید تا به صورت خودکار اجرا شود:
+You can configure the script in Windows Task Scheduler to run automatically:
 
-1. Task Scheduler را باز کنید
-2. Create Basic Task را انتخاب کنید
-3. Trigger را روی "When I log on" یا "Daily" تنظیم کنید
-4. Action را روی "Start a program" تنظیم کنید
+1. Open Task Scheduler
+2. Select Create Basic Task
+3. Set trigger to "When I log on" or "Daily"
+4. Set action to "Start a program"
 5. Program: `powershell.exe`
 6. Arguments: `-File "C:\path\to\auto-commit.ps1" -Interval 300`
 
-### استفاده در Cron (Linux/Mac)
+### Using Cron (Linux/Mac)
 
-می‌توانید اسکریپت را در crontab تنظیم کنید:
+You can configure the script in crontab:
 
 ```bash
-# باز کردن crontab
+# Open crontab
 crontab -e
 
-# اضافه کردن خط زیر برای اجرای هر 5 دقیقه
+# Add the following line to run every 5 minutes
 */5 * * * * cd /path/to/project && ./auto-commit.sh
 ```
 
-## 🔍 بررسی وضعیت
+## 🔍 Status Check
 
-برای بررسی وضعیت Git:
+To check Git status:
 
 ```bash
-# مشاهده تغییرات
+# View changes
 git status
 
-# مشاهده تاریخچه commits
+# View commit history
 git log --oneline -10
 
-# مشاهده تفاوت‌ها
+# View differences
 git diff
 ```
 
-## ⚠️ نکات مهم
+## ⚠️ Important Notes
 
-1. **همیشه قبل از commit بررسی کنید**: از `git status` استفاده کنید تا ببینید چه فایل‌هایی commit می‌شوند.
+1. **Always check before committing**: Use `git status` to see which files will be committed.
 
-2. **از پیام‌های واضح استفاده کنید**: حتی اگر از پیام پیش‌فرض استفاده می‌کنید، سعی کنید گاهی پیام‌های سفارشی بنویسید.
+2. **Use clear messages**: Even if using default messages, try to write custom messages sometimes.
 
-3. **Push را با احتیاط انجام دهید**: قبل از push، مطمئن شوید که تغییرات شما آماده هستند.
+3. **Push with caution**: Before pushing, make sure your changes are ready.
 
-4. **از .gitignore استفاده کنید**: فایل‌های موقت و غیرضروری را در `.gitignore` قرار دهید.
+4. **Use .gitignore**: Place temporary and unnecessary files in `.gitignore`.
 
-## 🛠️ عیب‌یابی
+## 🛠️ Troubleshooting
 
-### مشکل: اسکریپت اجرا نمی‌شود
+### Issue: Script doesn't run
 
 **Windows:**
 ```powershell
-# بررسی Execution Policy
+# Check Execution Policy
 Get-ExecutionPolicy
 
-# اگر Restricted است، آن را تغییر دهید
+# If it's Restricted, change it
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 **Linux/Mac:**
 ```bash
-# دادن دسترسی اجرا
+# Grant execute permission
 chmod +x auto-commit.sh
 ```
 
-### مشکل: Git hook کار نمی‌کند
+### Issue: Git hook doesn't work
 
 ```bash
-# بررسی دسترسی فایل
+# Check file permissions
 ls -la .git/hooks/post-commit
 
-# دادن دسترسی اجرا (Linux/Mac)
+# Grant execute permission (Linux/Mac)
 chmod +x .git/hooks/post-commit
 ```
 
-## 📚 منابع بیشتر
+## 📚 Additional Resources
 
 - [Git Documentation](https://git-scm.com/doc)
 - [Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)
@@ -175,5 +175,4 @@ chmod +x .git/hooks/post-commit
 
 ---
 
-**نکته**: این سیستم برای کمک به commit تدریجی طراحی شده است. همیشه قبل از push به remote، تغییرات را بررسی کنید.
-
+**Note**: This system is designed to help with incremental commits. Always review changes before pushing to remote.
