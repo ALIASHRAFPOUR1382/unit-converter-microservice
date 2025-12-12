@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from app.database import init_db
 from app.routers import todos, converter, export
 import logging
@@ -73,7 +74,7 @@ def root():
         "version": "1.0.0",
         "docs": "/docs",
         "health": "/health",
-        "converter": "/static/converter.html"
+        "converter": "/converter"
     }
 
 
@@ -87,4 +88,17 @@ def health_check():
         "service": "To-Do App Backend",
         "version": "1.0.0"
     }
+
+
+@app.get("/converter", tags=["converter"])
+def converter_page():
+    """
+    Serve the unit converter HTML page
+    """
+    converter_path = static_dir / "converter.html"
+    if converter_path.exists():
+        return FileResponse(converter_path)
+    else:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Converter page not found")
 
