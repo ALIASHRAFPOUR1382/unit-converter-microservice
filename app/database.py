@@ -7,13 +7,23 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get connection information from environment variables
+# Default to SQLite for local development (no PostgreSQL setup required)
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://postgres:postgres@localhost:5432/tododb"
+    "sqlite:///./tododb.db"  # SQLite database file
 )
 
-# Create engine
-engine = create_engine(DATABASE_URL, echo=True)
+# Create engine with appropriate settings
+if DATABASE_URL.startswith("sqlite"):
+    # SQLite specific settings
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},  # Needed for SQLite
+        echo=True
+    )
+else:
+    # PostgreSQL or other databases
+    engine = create_engine(DATABASE_URL, echo=True)
 
 # Create SessionLocal
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

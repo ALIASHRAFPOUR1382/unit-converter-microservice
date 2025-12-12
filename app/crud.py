@@ -90,3 +90,61 @@ def delete_todo(db: Session, todo_id: int) -> bool:
     db.commit()
     return True
 
+
+# Conversion History CRUD operations
+def create_conversion_history(db: Session, conversion: schemas.ConversionHistoryCreate) -> models.ConversionHistory:
+    """
+    Create a new conversion history record
+    """
+    db_conversion = models.ConversionHistory(
+        value=conversion.value,
+        from_unit=conversion.from_unit,
+        to_unit=conversion.to_unit,
+        result=conversion.result,
+        unit_type=conversion.unit_type
+    )
+    db.add(db_conversion)
+    db.commit()
+    db.refresh(db_conversion)
+    return db_conversion
+
+
+def get_conversion_history(
+    db: Session,
+    skip: int = 0,
+    limit: int = 50
+) -> tuple[List[models.ConversionHistory], int]:
+    """
+    Get conversion history with pagination
+    Returns:
+        tuple: (list of conversions, total count)
+    """
+    query = db.query(models.ConversionHistory)
+    total = query.count()
+    conversions = query.order_by(desc(models.ConversionHistory.created_at)).offset(skip).limit(limit).all()
+    return conversions, total
+
+
+def delete_conversion_history(db: Session, history_id: int) -> bool:
+    """
+    Delete a conversion history record
+    """
+    db_history = db.query(models.ConversionHistory).filter(models.ConversionHistory.id == history_id).first()
+    if not db_history:
+        return False
+    
+    db.delete(db_history)
+    db.commit()
+    return True
+
+
+def clear_conversion_history(db: Session) -> int:
+    """
+    Clear all conversion history
+    Returns:
+        int: Number of deleted records
+    """
+    count = db.query(models.ConversionHistory).delete()
+    db.commit()
+    return count
+

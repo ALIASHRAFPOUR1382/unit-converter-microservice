@@ -50,3 +50,30 @@ class TodoListResponse(BaseModel):
     page_size: int
     total_pages: int
 
+
+class ConversionHistoryCreate(BaseModel):
+    """
+    Schema for creating conversion history
+    """
+    value: float
+    from_unit: str
+    to_unit: str
+    result: float
+    unit_type: str
+
+
+class ConversionHistoryResponse(BaseModel):
+    """
+    Schema for conversion history response
+    """
+    id: int
+    value: float
+    from_unit: str
+    to_unit: str
+    result: float
+    unit_type: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+

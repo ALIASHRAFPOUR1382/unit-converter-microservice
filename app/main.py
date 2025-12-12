@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.database import init_db
-from app.routers import todos
+from app.routers import todos, converter
 import logging
 
 # Configure logging
@@ -31,6 +32,21 @@ app.add_middleware(
 
 # Include routers
 app.include_router(todos.router, prefix="/api")
+app.include_router(converter.router, prefix="/api")
+
+# Mount static files for HTML interface
+import os
+from pathlib import Path
+
+# Get the project root directory (parent of app directory)
+BASE_DIR = Path(__file__).resolve().parent.parent
+static_dir = BASE_DIR / "static"
+
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+    logger.info(f"Static files mounted from: {static_dir}")
+else:
+    logger.warning(f"Static directory not found: {static_dir}")
 
 
 @app.on_event("startup")
@@ -55,7 +71,8 @@ def root():
         "message": "Welcome to To-Do App Backend API",
         "version": "1.0.0",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
+        "converter": "/static/converter.html"
     }
 
 

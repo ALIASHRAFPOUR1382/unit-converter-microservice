@@ -1,43 +1,45 @@
 # To-Do App Backend API
 
-یک API کامل و قدرتمند برای مدیریت لیست وظایف (To-Do List) با قابلیت‌های CRUD کامل، pagination، filtering و sorting.
+A complete and powerful API for managing To-Do Lists with full CRUD capabilities, pagination, filtering, and sorting.
 
-## 📋 فهرست مطالب
+## 📋 Table of Contents
 
-- [معرفی پروژه](#معرفی-پروژه)
-- [تکنولوژی‌های استفاده شده](#تکنولوژی‌های-استفاده-شده)
-- [ساختار پروژه](#ساختار-پروژه)
-- [نصب و راه‌اندازی](#نصب-و-راه‌اندازی)
-- [استفاده از API](#استفاده-از-api)
+- [Project Introduction](#project-introduction)
+- [Technologies Used](#technologies-used)
+- [Project Structure](#project-structure)
+- [Installation and Setup](#installation-and-setup)
+- [API Usage](#api-usage)
 - [Docker](#docker)
 - [Git Workflow](#git-workflow)
-- [مستندات API](#مستندات-api)
+- [API Documentation](#api-documentation)
+- [Unit Converter](#unit-converter)
 
-## 🎯 معرفی پروژه
+## 🎯 Project Introduction
 
-این پروژه یک سرویس Backend کامل برای مدیریت لیست وظایف است که شامل عملیات CRUD (Create, Read, Update, Delete) می‌باشد. این API با استفاده از FastAPI ساخته شده و از PostgreSQL به عنوان پایگاه داده استفاده می‌کند.
+This project is a complete Backend service for managing To-Do Lists, including full CRUD (Create, Read, Update, Delete) operations. This API is built using FastAPI and uses PostgreSQL as the database.
 
-### ویژگی‌های اصلی
+### Main Features
 
-- ✅ عملیات CRUD کامل
-- 📄 Pagination برای لیست وظایف
-- 🔍 Filtering بر اساس وضعیت انجام
-- 📊 Sorting بر اساس تاریخ ایجاد
-- 🐳 Docker و Docker Compose برای استقرار آسان
-- 📚 مستندات خودکار API (Swagger UI)
-- 🔒 Validation کامل داده‌ها
-- ⚡ Performance بالا با FastAPI
+- ✅ Full CRUD operations
+- 📄 Pagination for task lists
+- 🔍 Filtering by completion status
+- 📊 Sorting by creation date
+- 🐳 Docker and Docker Compose for easy deployment
+- 📚 Automatic API documentation (Swagger UI)
+- 🔒 Complete data validation
+- ⚡ High performance with FastAPI
+- 🔄 Unit converter with graphical interface
 
-## 🛠 تکنولوژی‌های استفاده شده
+## 🛠 Technologies Used
 
-- **FastAPI**: فریمورک مدرن و سریع برای ساخت API
-- **PostgreSQL**: پایگاه داده رابطه‌ای قدرتمند
-- **SQLAlchemy**: ORM برای Python
-- **Pydantic**: اعتبارسنجی و serialization داده‌ها
+- **FastAPI**: Modern and fast framework for building APIs
+- **PostgreSQL/SQLite**: Relational database
+- **SQLAlchemy**: ORM for Python
+- **Pydantic**: Data validation and serialization
 - **Docker & Docker Compose**: Containerization
-- **Uvicorn**: ASGI server برای FastAPI
+- **Uvicorn**: ASGI server for FastAPI
 
-## 📁 ساختار پروژه
+## 📁 Project Structure
 
 ```
 cs_project/
@@ -47,6 +49,12 @@ cs_project/
 ├── docker-compose.yml
 ├── Dockerfile
 ├── requirements.txt
+├── run.ps1                 # Windows run script
+├── run.sh                  # Linux/Mac run script
+├── test_converter.py       # Unit converter test script
+├── converter_interactive.py # Interactive converter
+├── static/
+│   └── converter.html     # Graphical converter interface
 └── app/
     ├── __init__.py
     ├── main.py              # FastAPI application
@@ -56,110 +64,122 @@ cs_project/
     ├── crud.py              # CRUD operations
     └── routers/
         ├── __init__.py
-        └── todos.py         # Todo API endpoints
+        ├── todos.py         # Todo API endpoints
+        └── converter.py     # Unit converter endpoints
 ```
 
-## 🚀 نصب و راه‌اندازی
+## 🚀 Installation and Setup
 
-### پیش‌نیازها
+### Prerequisites
 
-- Python 3.11 یا بالاتر
-- Docker و Docker Compose (برای استقرار با Docker)
-- PostgreSQL (اگر می‌خواهید بدون Docker اجرا کنید)
+- Python 3.11 or higher
+- Docker and Docker Compose (for Docker deployment)
+- PostgreSQL (if you want to run without Docker)
 
-### روش 1: استفاده از Docker (پیشنهادی)
+### Method 1: Using Docker (Recommended)
 
-1. کلون کردن پروژه:
+1. Clone the project:
 ```bash
 git clone <repository-url>
 cd cs_project
 ```
 
-2. اجرای با Docker Compose:
+2. Run with Docker Compose:
 ```bash
 docker-compose up --build
 ```
 
-این دستور:
-- PostgreSQL را راه‌اندازی می‌کند
-- اپلیکیشن FastAPI را build و اجرا می‌کند
-- جداول دیتابیس را به صورت خودکار ایجاد می‌کند
+This command will:
+- Start PostgreSQL
+- Build and run the FastAPI application
+- Automatically create database tables
 
-3. دسترسی به API:
+3. Access the API:
 - API: http://localhost:8000
-- مستندات Swagger: http://localhost:8000/docs
-- مستندات ReDoc: http://localhost:8000/redoc
+- Swagger Documentation: http://localhost:8000/docs
+- ReDoc Documentation: http://localhost:8000/redoc
+- Unit Converter: http://localhost:8000/static/converter.html
 
-### روش 2: نصب محلی
+### Method 2: Local Installation
 
-1. ایجاد virtual environment:
+1. Create virtual environment:
 ```bash
 python -m venv venv
-source venv/bin/activate  # در Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. نصب dependencies:
+2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. تنظیم دیتابیس:
-   - PostgreSQL را نصب و راه‌اندازی کنید
-   - یک دیتابیس با نام `tododb` ایجاد کنید
-   - متغیر محیطی `DATABASE_URL` را تنظیم کنید:
-   ```bash
-   export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/tododb"
-   ```
+3. Database setup:
+   - For SQLite (default, no setup required):
+     - The database file (`tododb.db`) will be created automatically
+   - For PostgreSQL:
+     - Install and start PostgreSQL
+     - Create a database named `tododb`
+     - Set the environment variable `DATABASE_URL`:
+     ```bash
+     export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/tododb"
+     ```
 
-4. اجرای اپلیکیشن:
+4. Run the application:
 ```bash
+# Using the run script (Windows)
+.\run.ps1
+
+# Using the run script (Linux/Mac)
+./run.sh
+
+# Or manually
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-## 📡 استفاده از API
+## 📡 API Usage
 
-### Endpoints اصلی
+### Main Endpoints
 
-#### 1. ایجاد Todo جدید
+#### 1. Create a new Todo
 ```bash
 POST /api/todos
 Content-Type: application/json
 
 {
-  "title": "یادگیری FastAPI",
-  "description": "مطالعه مستندات FastAPI",
+  "title": "Learn FastAPI",
+  "description": "Study FastAPI documentation",
   "completed": false
 }
 ```
 
-#### 2. دریافت لیست Todos
+#### 2. Get Todos list
 ```bash
 GET /api/todos?page=1&page_size=10&completed=false
 ```
 
-پارامترهای query:
-- `page`: شماره صفحه (پیش‌فرض: 1)
-- `page_size`: تعداد آیتم در هر صفحه (پیش‌فرض: 10، حداکثر: 100)
-- `completed`: فیلتر بر اساس وضعیت (true/false/null برای همه)
+Query parameters:
+- `page`: Page number (default: 1)
+- `page_size`: Number of items per page (default: 10, maximum: 100)
+- `completed`: Filter by status (true/false/null for all)
 
-#### 3. دریافت یک Todo
+#### 3. Get a Todo
 ```bash
 GET /api/todos/{id}
 ```
 
-#### 4. به‌روزرسانی کامل Todo (PUT)
+#### 4. Full update Todo (PUT)
 ```bash
 PUT /api/todos/{id}
 Content-Type: application/json
 
 {
-  "title": "یادگیری FastAPI - به‌روزرسانی شده",
-  "description": "تکمیل شده",
+  "title": "Learn FastAPI - Updated",
+  "description": "Completed",
   "completed": true
 }
 ```
 
-#### 5. به‌روزرسانی جزئی Todo (PATCH)
+#### 5. Partial update Todo (PATCH)
 ```bash
 PATCH /api/todos/{id}
 Content-Type: application/json
@@ -169,7 +189,7 @@ Content-Type: application/json
 }
 ```
 
-#### 6. حذف Todo
+#### 6. Delete Todo
 ```bash
 DELETE /api/todos/{id}
 ```
@@ -179,54 +199,111 @@ DELETE /api/todos/{id}
 GET /health
 ```
 
-### مثال‌های استفاده با curl
+### Usage Examples with curl
 
 ```bash
-# ایجاد Todo جدید
+# Create a new Todo
 curl -X POST "http://localhost:8000/api/todos" \
   -H "Content-Type: application/json" \
   -d '{
-    "title": "خرید کتاب",
-    "description": "خرید کتاب Python",
+    "title": "Buy a book",
+    "description": "Buy Python book",
     "completed": false
   }'
 
-# دریافت لیست Todos
+# Get Todos list
 curl "http://localhost:8000/api/todos?page=1&page_size=10"
 
-# دریافت یک Todo
+# Get a Todo
 curl "http://localhost:8000/api/todos/1"
 
-# به‌روزرسانی Todo
+# Update Todo
 curl -X PATCH "http://localhost:8000/api/todos/1" \
   -H "Content-Type: application/json" \
   -d '{"completed": true}'
 
-# حذف Todo
+# Delete Todo
 curl -X DELETE "http://localhost:8000/api/todos/1"
+```
+
+## 🔄 Unit Converter
+
+The project includes a unit converter feature with both API endpoints and a graphical interface.
+
+### Graphical Interface
+
+Access the converter at: **http://localhost:8000/static/converter.html**
+
+Features:
+- Beautiful, user-friendly interface
+- Support for length, weight, and temperature conversions
+- Real-time conversion using the API
+
+### API Endpoints
+
+#### Convert Units
+```bash
+POST /api/converter/convert
+Content-Type: application/json
+
+{
+  "value": 100,
+  "from_unit": "kilometer",
+  "to_unit": "mile",
+  "unit_type": "length"
+}
+```
+
+#### Get Available Units
+```bash
+GET /api/converter/units
+```
+
+### Supported Units
+
+**Length:**
+- meter, kilometer, centimeter, millimeter
+- mile, foot, inch, yard
+
+**Weight:**
+- kilogram, gram, pound, ounce, ton
+
+**Temperature:**
+- celsius, fahrenheit, kelvin
+
+### Standalone Converter Scripts
+
+You can also use the converter without the server:
+
+```bash
+# Quick test with examples
+python test_converter.py
+
+# Interactive mode
+python converter_interactive.py
 ```
 
 ## 🐳 Docker
 
-### دستورات مفید Docker
+### Useful Docker Commands
 
 ```bash
-# اجرای سرویس‌ها
+# Run services
 docker-compose up
 
-# اجرا در background
+# Run in background
 docker-compose up -d
 
-# توقف سرویس‌ها
+# Stop services
 docker-compose down
 
-# توقف و حذف volumes
+# Stop and remove volumes
 docker-compose down -v
 
-# مشاهده لاگ‌ها
+# View logs
 docker-compose logs -f app
 
-# rebuild کردن
+# Rebuild
 docker-compose up --build
 ```
 
@@ -239,6 +316,7 @@ This project uses Git workflow with feature branches:
 - `feature/database-setup`: Database layer implementation
 - `feature/api-endpoints`: API endpoints implementation
 - `feature/docker-setup`: Docker configuration
+- `feature/unit-converter`: Unit converter feature
 
 ### Pull Requests
 
@@ -274,57 +352,58 @@ chmod +x auto-commit.sh
 
 For more information, see the [`GIT_AUTO_COMMIT.md`](GIT_AUTO_COMMIT.md) file.
 
-## 📚 مستندات API
+## 📚 API Documentation
 
-پس از اجرای اپلیکیشن، می‌توانید از مستندات خودکار استفاده کنید:
+After running the application, you can use the automatic documentation:
 
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
-این مستندات شامل:
-- لیست کامل endpoints
-- پارامترهای ورودی و خروجی
-- مثال‌های استفاده
-- امکان تست مستقیم API
+This documentation includes:
+- Complete list of endpoints
+- Input and output parameters
+- Usage examples
+- Direct API testing capability
 
-## 🧪 تست API
+## 🧪 Testing the API
 
-می‌توانید از ابزارهای زیر برای تست API استفاده کنید:
+You can use the following tools to test the API:
 
 1. **Swagger UI**: http://localhost:8000/docs
-2. **Postman**: Import کردن collection
-3. **curl**: دستورات خط فرمان
-4. **httpie**: ابزار مدرن برای HTTP requests
+2. **Postman**: Import collection
+3. **curl**: Command line tools
+4. **httpie**: Modern tool for HTTP requests
+5. **Graphical Interface**: http://localhost:8000/static/converter.html (for unit converter)
 
-## 📝 مدل داده Todo
+## 📝 Todo Data Model
 
 ```python
 {
-  "id": int,                    # شناسه یکتا
-  "title": str,                 # عنوان وظیفه (اجباری)
-  "description": str | null,    # توضیحات (اختیاری)
-  "completed": bool,            # وضعیت انجام
-  "created_at": datetime,       # تاریخ ایجاد
-  "updated_at": datetime        # تاریخ آخرین به‌روزرسانی
+  "id": int,                    # Unique identifier
+  "title": str,                 # Task title (required)
+  "description": str | null,    # Description (optional)
+  "completed": bool,            # Completion status
+  "created_at": datetime,       # Creation date
+  "updated_at": datetime        # Last update date
 }
 ```
 
-## 🔧 تنظیمات
+## 🔧 Configuration
 
-متغیرهای محیطی قابل تنظیم:
+Configurable environment variables:
 
-- `DATABASE_URL`: آدرس اتصال به دیتابیس PostgreSQL
-  - پیش‌فرض: `postgresql://postgres:postgres@localhost:5432/tododb`
+- `DATABASE_URL`: Database connection URL
+  - Default (SQLite): `sqlite:///./tododb.db`
+  - PostgreSQL: `postgresql://postgres:postgres@localhost:5432/tododb`
 
-## 📄 مجوز
+## 📄 License
 
-این پروژه برای استفاده آموزشی ساخته شده است.
+This project is created for educational purposes.
 
-## 👤 نویسنده
+## 👤 Author
 
-این پروژه به عنوان تمرین درس مهندسی نرم‌افزار پیاده‌سازی شده است.
+This project is implemented as an exercise for Software Engineering course.
 
 ---
 
-**نکته**: برای سوالات و مشکلات، لطفاً issue در repository ایجاد کنید.
-
+**Note**: For questions and issues, please create an issue in the repository.
