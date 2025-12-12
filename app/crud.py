@@ -148,3 +148,26 @@ def clear_conversion_history(db: Session) -> int:
     db.commit()
     return count
 
+
+def get_all_conversion_history(db: Session) -> List[models.ConversionHistory]:
+    """
+    Get all conversion history records without pagination
+    Returns:
+        List[models.ConversionHistory]: All conversion history records
+    """
+    return db.query(models.ConversionHistory).order_by(desc(models.ConversionHistory.created_at)).all()
+
+
+def get_all_todos(db: Session, completed: Optional[bool] = None) -> List[models.Todo]:
+    """
+    Get all todos without pagination
+    Returns:
+        List[models.Todo]: All todo records
+    """
+    query = db.query(models.Todo)
+    
+    # Filter by completed status
+    if completed is not None:
+        query = query.filter(models.Todo.completed == completed)
+    
+    return query.order_by(desc(models.Todo.created_at)).all()
