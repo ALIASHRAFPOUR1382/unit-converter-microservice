@@ -51,8 +51,6 @@ cs_project/
 ├── requirements.txt
 ├── run.ps1                 # Windows run script
 ├── run.sh                  # Linux/Mac run script
-├── test_converter.py       # Unit converter test script
-├── converter_interactive.py # Interactive converter
 ├── static/
 │   └── converter.html     # Graphical converter interface
 └── app/
@@ -270,18 +268,6 @@ GET /api/converter/units
 
 **Temperature:**
 - celsius, fahrenheit, kelvin
-
-### Standalone Converter Scripts
-
-You can also use the converter without the server:
-
-```bash
-# Quick test with examples
-python test_converter.py
-
-# Interactive mode
-python converter_interactive.py
-```
 
 ## 🐳 Docker
 
