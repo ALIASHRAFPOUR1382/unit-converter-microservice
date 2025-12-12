@@ -507,6 +507,15 @@
             </div>
         </form>
 
+        <div class="export-section" style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 12px; text-align: center;">
+            <h3 style="margin-bottom: 15px; color: #333; font-size: 1.2em;">📊 Export to Excel</h3>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button onclick="exportAll()" class="btn-export" style="background: #4caf50; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Export All Data</button>
+                <button onclick="exportTodos()" class="btn-export" style="background: #2196f3; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Export Todos</button>
+                <button onclick="exportConversions()" class="btn-export" style="background: #ff9800; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Export Conversions</button>
+            </div>
+        </div>
+
         <div class="loading" id="loading">Converting</div>
         <div class="error" id="error"></div>
         
@@ -740,27 +749,28 @@
                     })
                 });
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    document.getElementById('loading').classList.remove('show');
-                    
-                    // Format result
-                    const formattedResult = parseFloat(data.result.toFixed(6));
-                    document.getElementById('resultValue').textContent = formattedResult;
-                    document.getElementById('resultText').textContent = 
-                        `${value} ${unitLabels[unitType][fromUnit]} = ${formattedResult} ${unitLabels[unitType][toUnit]}`;
-                    document.getElementById('result').classList.add('show');
-                    
-                    // Save to history
-                    saveToHistory(value, fromUnit, toUnit, formattedResult, unitType);
-                } else {
-                    throw new Error(data.detail || 'Conversion error');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+                    throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
                 }
+
+                const data = await response.json();
+                document.getElementById('loading').classList.remove('show');
+                
+                // Format result
+                const formattedResult = parseFloat(data.result.toFixed(6));
+                document.getElementById('resultValue').textContent = formattedResult;
+                document.getElementById('resultText').textContent = 
+                    `${value} ${unitLabels[unitType][fromUnit]} = ${formattedResult} ${unitLabels[unitType][toUnit]}`;
+                document.getElementById('result').classList.add('show');
+                
+                // Save to history
+                saveToHistory(value, fromUnit, toUnit, formattedResult, unitType);
             } catch (error) {
+                console.error('Conversion error:', error);
                 document.getElementById('loading').classList.remove('show');
                 document.getElementById('error').textContent = 
-                    'Error: ' + (error.message || 'Could not connect to server. Make sure the server is running.');
+                    'Error: ' + (error.message || 'Could not connect to server. Make sure the server is running on http://localhost:8000');
                 document.getElementById('error').classList.add('show');
             }
         });
@@ -771,6 +781,70 @@
             document.getElementById('error').classList.remove('show');
             fromUnitSelect.innerHTML = '<option value="">Select source unit...</option>';
             toUnitSelect.innerHTML = '<option value="">Select target unit...</option>';
+        }
+
+        // Export functions
+        async function exportAll() {
+            try {
+                const response = await fetch('http://localhost:8000/api/export/excel');
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `database_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    alert('Failed to export data');
+                }
+            } catch (error) {
+                alert('Error exporting data: ' + error.message);
+            }
+        }
+
+        async function exportTodos() {
+            try {
+                const response = await fetch('http://localhost:8000/api/export/excel/todos');
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `todos_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    alert('Failed to export todos');
+                }
+            } catch (error) {
+                alert('Error exporting todos: ' + error.message);
+            }
+        }
+
+        async function exportConversions() {
+            try {
+                const response = await fetch('http://localhost:8000/api/export/excel/conversions');
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `conversions_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    alert('Failed to export conversions');
+                }
+            } catch (error) {
+                alert('Error exporting conversions: ' + error.message);
+            }
         }
 
         // Load history on page load

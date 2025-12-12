@@ -53,6 +53,10 @@ logs/
 .DS_Store
 Thumbs.db
 
+# Exports
+exports/
+*.xlsx
+
 # Auto-commit scripts (optional - uncomment if you don't want to track these)
 # auto-commit.ps1
 # auto-commit.sh

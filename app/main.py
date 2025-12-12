@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.database import init_db
-from app.routers import todos, converter
+from app.routers import todos, converter, export
 import logging
 
 # Configure logging
@@ -33,6 +33,7 @@ app.add_middleware(
 # Include routers
 app.include_router(todos.router, prefix="/api")
 app.include_router(converter.router, prefix="/api")
+app.include_router(export.router, prefix="/api")
 
 # Mount static files for HTML interface
 import os
