@@ -19,6 +19,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY ./app /app/app
 
+# Copy static files
+COPY ./static /app/static
+
+# Create exports directory for Excel files
+RUN mkdir -p /app/exports
+
 # Expose port
 EXPOSE 8000
 

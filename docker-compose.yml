@@ -29,6 +29,9 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/tododb
     ports:
       - "8000:8000"
+    volumes:
+      - ./exports:/app/exports
+      - ./static:/app/static
     depends_on:
       db:
         condition: service_healthy
