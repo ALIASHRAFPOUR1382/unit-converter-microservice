@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Query, HTTPException, Depends
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, ValidationError, ValidationInfo
 from typing import Literal, List
 from enum import Enum
 from app.database import get_db
 from app import crud, schemas
-from math import ceil
+from math import ceil, isnan, isinf
 
 router = APIRouter(prefix="/converter", tags=["converter"])
 
@@ -36,12 +36,70 @@ class TemperatureUnit(str, Enum):
     KELVIN = "kelvin"
 
 
+# Valid unit sets
+VALID_LENGTH_UNITS = {"meter", "kilometer", "centimeter", "millimeter", "mile", "foot", "inch", "yard"}
+VALID_WEIGHT_UNITS = {"kilogram", "gram", "pound", "ounce", "ton"}
+VALID_TEMPERATURE_UNITS = {"celsius", "fahrenheit", "kelvin"}
+
 # Request/Response models
 class ConvertRequest(BaseModel):
     value: float = Field(..., description="Value to convert")
     from_unit: str = Field(..., description="Source unit")
     to_unit: str = Field(..., description="Target unit")
     unit_type: Literal["length", "weight", "temperature"] = Field(..., description="Type of unit conversion")
+    
+    @field_validator('value')
+    @classmethod
+    def validate_value(cls, v: float) -> float:
+        """Validate that value is a valid number"""
+        if isnan(v):
+            raise ValueError("Value cannot be NaN (Not a Number)")
+        if isinf(v):
+            raise ValueError("Value cannot be Infinity")
+        # Check for extremely large values that might cause overflow
+        if abs(v) > 1e15:
+            raise ValueError(f"Value {v} is too large. Maximum allowed value is 1e15")
+        return v
+    
+    @field_validator('from_unit', 'to_unit')
+    @classmethod
+    def validate_unit(cls, v: str, info: ValidationInfo) -> str:
+        """Validate unit based on unit_type"""
+        if not v or not isinstance(v, str):
+            raise ValueError("Unit must be a non-empty string")
+        return v.strip().lower()
+    
+    def model_post_init(self, __context):
+        """Validate units match the unit_type"""
+        from_unit_lower = self.from_unit.lower()
+        to_unit_lower = self.to_unit.lower()
+        
+        if self.unit_type == "length":
+            valid_units = VALID_LENGTH_UNITS
+            unit_type_name = "length"
+        elif self.unit_type == "weight":
+            valid_units = VALID_WEIGHT_UNITS
+            unit_type_name = "weight"
+        elif self.unit_type == "temperature":
+            valid_units = VALID_TEMPERATURE_UNITS
+            unit_type_name = "temperature"
+        else:
+            raise ValueError(f"Invalid unit_type: {self.unit_type}")
+        
+        if from_unit_lower not in valid_units:
+            raise ValueError(
+                f"Invalid source unit '{self.from_unit}' for {unit_type_name}. "
+                f"Valid units: {', '.join(sorted(valid_units))}"
+            )
+        
+        if to_unit_lower not in valid_units:
+            raise ValueError(
+                f"Invalid target unit '{self.to_unit}' for {unit_type_name}. "
+                f"Valid units: {', '.join(sorted(valid_units))}"
+            )
+        
+        if from_unit_lower == to_unit_lower:
+            raise ValueError(f"Source and target units cannot be the same: {self.from_unit}")
 
 
 class ConvertResponse(BaseModel):
@@ -54,7 +112,16 @@ class ConvertResponse(BaseModel):
 
 # Conversion functions
 def convert_length(value: float, from_unit: str, to_unit: str) -> float:
-    """Convert length units"""
+    """Convert length units with validation"""
+    from_unit_lower = from_unit.lower()
+    to_unit_lower = to_unit.lower()
+    
+    # Validate units
+    if from_unit_lower not in VALID_LENGTH_UNITS:
+        raise ValueError(f"Invalid source unit for length: '{from_unit}'. Valid units: {', '.join(sorted(VALID_LENGTH_UNITS))}")
+    if to_unit_lower not in VALID_LENGTH_UNITS:
+        raise ValueError(f"Invalid target unit for length: '{to_unit}'. Valid units: {', '.join(sorted(VALID_LENGTH_UNITS))}")
+    
     # Convert to meters first
     to_meter = {
         "meter": 1.0,
@@ -68,7 +135,12 @@ def convert_length(value: float, from_unit: str, to_unit: str) -> float:
     }
     
     # Convert from source unit to meters
-    value_in_meters = value * to_meter.get(from_unit.lower(), 1.0)
+    conversion_factor = to_meter[from_unit_lower]
+    value_in_meters = value * conversion_factor
+    
+    # Check for overflow
+    if isinf(value_in_meters) or isnan(value_in_meters):
+        raise ValueError(f"Calculation overflow: {value} {from_unit} results in invalid value")
     
     # Convert from meters to target unit
     from_meter = {
@@ -82,11 +154,26 @@ def convert_length(value: float, from_unit: str, to_unit: str) -> float:
         "yard": 1.09361
     }
     
-    return value_in_meters * from_meter.get(to_unit.lower(), 1.0)
+    result = value_in_meters * from_meter[to_unit_lower]
+    
+    # Validate result
+    if isinf(result) or isnan(result):
+        raise ValueError(f"Calculation result is invalid: {result}")
+    
+    return result
 
 
 def convert_weight(value: float, from_unit: str, to_unit: str) -> float:
-    """Convert weight units"""
+    """Convert weight units with validation"""
+    from_unit_lower = from_unit.lower()
+    to_unit_lower = to_unit.lower()
+    
+    # Validate units
+    if from_unit_lower not in VALID_WEIGHT_UNITS:
+        raise ValueError(f"Invalid source unit for weight: '{from_unit}'. Valid units: {', '.join(sorted(VALID_WEIGHT_UNITS))}")
+    if to_unit_lower not in VALID_WEIGHT_UNITS:
+        raise ValueError(f"Invalid target unit for weight: '{to_unit}'. Valid units: {', '.join(sorted(VALID_WEIGHT_UNITS))}")
+    
     # Convert to kilograms first
     to_kilogram = {
         "kilogram": 1.0,
@@ -97,7 +184,12 @@ def convert_weight(value: float, from_unit: str, to_unit: str) -> float:
     }
     
     # Convert from source unit to kilograms
-    value_in_kg = value * to_kilogram.get(from_unit.lower(), 1.0)
+    conversion_factor = to_kilogram[from_unit_lower]
+    value_in_kg = value * conversion_factor
+    
+    # Check for overflow
+    if isinf(value_in_kg) or isnan(value_in_kg):
+        raise ValueError(f"Calculation overflow: {value} {from_unit} results in invalid value")
     
     # Convert from kilograms to target unit
     from_kilogram = {
@@ -108,29 +200,62 @@ def convert_weight(value: float, from_unit: str, to_unit: str) -> float:
         "ton": 0.001
     }
     
-    return value_in_kg * from_kilogram.get(to_unit.lower(), 1.0)
+    result = value_in_kg * from_kilogram[to_unit_lower]
+    
+    # Validate result
+    if isinf(result) or isnan(result):
+        raise ValueError(f"Calculation result is invalid: {result}")
+    
+    return result
 
 
 def convert_temperature(value: float, from_unit: str, to_unit: str) -> float:
-    """Convert temperature units"""
+    """Convert temperature units with validation"""
     from_unit_lower = from_unit.lower()
     to_unit_lower = to_unit.lower()
     
-    # Convert to Celsius first
-    if from_unit_lower == "fahrenheit":
-        celsius = (value - 32) * 5 / 9
-    elif from_unit_lower == "kelvin":
-        celsius = value - 273.15
-    else:  # celsius
-        celsius = value
+    # Validate units
+    if from_unit_lower not in VALID_TEMPERATURE_UNITS:
+        raise ValueError(f"Invalid source unit for temperature: '{from_unit}'. Valid units: {', '.join(sorted(VALID_TEMPERATURE_UNITS))}")
+    if to_unit_lower not in VALID_TEMPERATURE_UNITS:
+        raise ValueError(f"Invalid target unit for temperature: '{to_unit}'. Valid units: {', '.join(sorted(VALID_TEMPERATURE_UNITS))}")
     
-    # Convert from Celsius to target unit
-    if to_unit_lower == "fahrenheit":
-        return celsius * 9 / 5 + 32
-    elif to_unit_lower == "kelvin":
-        return celsius + 273.15
-    else:  # celsius
-        return celsius
+    # Convert to Celsius first
+    try:
+        if from_unit_lower == "fahrenheit":
+            celsius = (value - 32) * 5 / 9
+        elif from_unit_lower == "kelvin":
+            # Absolute zero check for Kelvin
+            if value < 0:
+                raise ValueError(f"Invalid temperature: Kelvin cannot be negative. Received: {value} K")
+            celsius = value - 273.15
+        else:  # celsius
+            celsius = value
+        
+        # Validate intermediate result
+        if isinf(celsius) or isnan(celsius):
+            raise ValueError(f"Calculation error: {value} {from_unit} results in invalid Celsius value")
+        
+        # Convert from Celsius to target unit
+        if to_unit_lower == "fahrenheit":
+            result = celsius * 9 / 5 + 32
+        elif to_unit_lower == "kelvin":
+            result = celsius + 273.15
+            # Validate Kelvin result (cannot be negative)
+            if result < 0:
+                raise ValueError(f"Conversion result is invalid: {result} K (below absolute zero)")
+        else:  # celsius
+            result = celsius
+        
+        # Validate final result
+        if isinf(result) or isnan(result):
+            raise ValueError(f"Calculation result is invalid: {result}")
+        
+        return result
+    except ZeroDivisionError:
+        raise ValueError("Division by zero error in temperature conversion")
+    except OverflowError:
+        raise ValueError(f"Temperature conversion overflow for value: {value} {from_unit}")
 
 
 @router.post("/convert", response_model=ConvertResponse)
@@ -154,6 +279,19 @@ def convert_units(request: ConvertRequest):
     ```
     """
     try:
+        # Validate input value
+        if isnan(request.value):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid input: Value cannot be NaN (Not a Number)"
+            )
+        if isinf(request.value):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid input: Value cannot be Infinity"
+            )
+        
+        # Perform conversion based on unit type
         if request.unit_type == "length":
             result = convert_length(request.value, request.from_unit, request.to_unit)
         elif request.unit_type == "weight":
@@ -166,6 +304,13 @@ def convert_units(request: ConvertRequest):
                 detail=f"Unsupported unit type: {request.unit_type}. Supported types: length, weight, temperature"
             )
         
+        # Validate result before returning
+        if isnan(result) or isinf(result):
+            raise HTTPException(
+                status_code=500,
+                detail=f"Calculation error: Result is invalid (NaN or Infinity). Please check your input values."
+            )
+        
         return ConvertResponse(
             value=request.value,
             from_unit=request.from_unit,
@@ -173,8 +318,38 @@ def convert_units(request: ConvertRequest):
             result=round(result, 6),
             unit_type=request.unit_type
         )
+    except ValidationError as e:
+        # Pydantic validation errors
+        error_messages = [f"{err['loc'][0]}: {err['msg']}" for err in e.errors()]
+        raise HTTPException(
+            status_code=422,
+            detail=f"Validation error: {'; '.join(error_messages)}"
+        )
+    except ValueError as e:
+        # Value errors from conversion functions
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid input: {str(e)}"
+        )
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except OverflowError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Calculation overflow: The result is too large to compute. {str(e)}"
+        )
+    except ZeroDivisionError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Division by zero error: {str(e)}"
+        )
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Conversion error: {str(e)}")
+        # Catch-all for unexpected errors
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error during conversion: {str(e)}. Please check your input and try again."
+        )
 
 
 @router.get("/units")
